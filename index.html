@@ -1,0 +1,241 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<title></title>
+<meta name="" content="">
+</head>
+<body>
+<canvas style="position: absolute; left: 27%"> </canvas>
+</body>
+</html>
+
+<script> 
+canvas = document.getElementsByTagName('canvas')[0]; 
+ctx = canvas.getContext('2d'); 
+canvas.width = 420; 
+canvas.height = 600; 
+canvas.style.background = '#0278bf';
+
+///// to create the potentials values 
+ field =  []; 
+for(i=0;i<canvas.height/30 -1 ; i++) {
+	field.push([0,0,0,0,0,0,0,0,0,0,0,0,0,0]); 
+}
+////
+var Elem = function() {
+	this.init = function() {
+		figure = Math.random()*4; 
+		//figure = 4; 
+	switch(Math.round(figure)) {
+		case 0: //stick
+		Elem.x = [4,5,6,7]; 
+		Elem.y=[0,0,0,0]; 
+		break;
+		case 1: //rigth hook
+		Elem.x = [4,4,5,5]; 
+		Elem.y=[0,1,1,2]; 
+		break;
+		case 2: 
+		Elem.x = [4,5,5,6]; 
+		Elem.y=[0,0,1,0];
+		break; 
+		case 3: //spike
+		Elem.x = [4,4,4,5]; //[4,5,6,6]
+		Elem.y=[0,1,2,2]; // [1,1,1,0]
+		break;
+		case 4: //cube
+		Elem.x = [4,5,4,5]; 
+		Elem.y=[0,0,1,1]; 	
+	}
+	
+	}
+	
+	this.invert = function() {
+		y = MinMax('min', Elem.y); //////////////////////////!clockwise moving 
+		x = MinMax('max', Elem.x); 
+		Minx =  MinMax('min', Elem.x); 
+		buff = []; 
+		for(i=0; i<4; i++) {
+			buff[i]= Elem.x[i]; 
+			Elem.x[i]=Elem.y[i]-y + Minx;
+			Elem.y[i]= x- buff[i] + y;
+	}	
+	} 
+	this.draw = function(color) {
+									ctx.fillStyle = color;
+		for(i=0; i<4; i++) {
+			ctx.fillRect(Elem.x[i]*30, Elem.y[i]*30, 30, 30); 
+		} 	
+		
+	}
+	this.refresh = function() {
+		
+		count=0;
+	  
+			if(ArraySumm(field[this.refreshLine])==14) {
+						for(i=0;i<field.length;i++) {
+							if(field.length-1-i-count<0) continue; 
+										while(ArraySumm(field[field.length-1-i-count])==field[this.refreshLine].length) {count++};  			
+						field[field.length-1-i]=field[field.length-1-i-count]; 	
+					
+						this.refreshDraw(field.length-1-i-count); 
+			}
+			
+			}
+			
+		
+			} 
+	this.refreshDraw = function(number, offset) {
+					for(j=0;j<field[this.refreshLine].length; j++) {
+											if(field[number][j]==1) {
+											
+												ctx.fillStyle  = '#015456'; 
+												ctx.fillRect(j*30, (number+count)*30, 30, 30); 
+											} else {
+											
+												ctx.fillStyle  = '#0278bf'; 
+												ctx.fillRect(j*30, (number+count)*30+30, 30, 30); 
+											}
+										}
+	}
+	
+	this.step = function() {
+		this.refreshLineA= []; 	
+			memory = 0; // to set thew time to clear interval 
+	this.draw('#0278bf'); 
+	
+		for(i=0; i<4; i++) {
+			if(Elem.y[i]==canvas.height/30-2||field[Elem.y[i]+1][Elem.x[i]]==1) { // if it`s collision 
+												memory = 1;   // to message the program to clear interval 
+											
+													 this.refreshLineA.push(Elem.y[i]);  
+												
+											
+			  }
+			  this.refreshLine = MinMax('max', this.refreshLineA); 
+			Elem.y[i]++; 
+		} 
+		if(memory==1) {
+			clearInterval(window.d); 
+			this.draw('#015456'); 
+											for(i=0;i<4;i++) {
+												
+												field[Elem.y[i]-1][Elem.x[i]]=1; 
+											}	
+																
+																		this.refresh(); 			
+			run(); 
+		}
+this.draw('#015456');
+	}
+	
+
+	
+	
+	this.edit = function(action) {
+		if(action=='left')  {
+			for(i=0; i<4; i++) {
+				if(field[Elem.y[i]][Elem.x[i]]==1) continue; 
+				Elem.x[i]--; 
+				}
+			}
+			if(action=="right") {
+				for(i=0; i<4; i++) {
+						
+				Elem.x[i]++; 
+				}
+			}
+				if(action=="up") {
+				this.draw('#0278bf'); 
+				this.invert(); 
+				this.draw('#015456'); 
+			}
+		
+	}
+	
+	
+
+	}
+ //constr
+
+//// ЗАЧЕм? Да просто ООП в JS беспощадно.... А this работает как в 4-м ПЫХЕ...
+
+function run() {
+	window.elem = new Elem();
+elem.init(); 
+elem.draw('#015456'); 
+window.d = setInterval(function() {elem.step()}, 300);
+
+}
+
+
+run(); 
+
+
+
+window.onkeydown = function(e) {
+	window.elem.draw('#0278bf'); 
+		if(e.keyCode==37) window.elem.edit('left');  
+		if(e.keyCode==39) window.elem.edit('right');
+		window.elem.draw('#015456'); 
+		if(e.keyCode==38) window.elem.edit('up'); 
+	
+}
+
+function ArraySumm(array) {
+	summ=0; 
+	for(j=0; j<array.length; j++) {
+		summ+=array[j]; 
+	}
+	return summ; 
+}
+
+
+function MinMax(how, array) {
+	if(how=='min') {
+		min=Infinity; 
+		for(k=0;k<array.length; k++) {
+			if(array[k]<min) min=array[k]; pos=k; 
+		}
+		return min; 
+	} else {
+		max=-1*Infinity; 
+		for(k=0;k<array.length; k++) {
+			if(array[k]>max) max=array[k]; pos=k; 
+		}
+		return max; 
+	}
+	
+	
+}
+
+
+
+
+/*		y = MinMax('min', Elem.y); //////////////////////////clockwise moving 
+		x = MinMax('max', Elem.x); 
+		Minx =  MinMax('min', Elem.x); 
+		buff = []; 
+		for(i=0; i<4; i++) {
+			buff[i]= Elem.x[i]; 
+			Elem.x[i]=Elem.y[i]-y + Minx;
+			Elem.y[i]= x- buff[i] + y;
+		}*/ 
+
+/*
+avgX = Math.round(ArraySumm(Elem.x)/4);  /// clockwise 
+		x = MinMax('max', Elem.x); 
+		minY = MinMax('min', Elem.y);
+		minX = MinMax('min', Elem.x);
+		buff = []; 
+					for(i=0;i<4;i++) {
+						buff[i]= Elem.x[i]; 
+						Elem.x[i]= avgX + (minY-Elem.y[i]);	
+						Elem.y[i]= (buff[i]-x)+minY;
+						
+					}
+					*/
+
+
+
+</script> 
