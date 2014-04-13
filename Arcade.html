@@ -1,0 +1,246 @@
+<style> 
+canvas {
+
+
+	position: absolute;
+	top: 20%;
+	left: 20%;
+}
+#timer {
+	position: absolute;
+	top: 20%;
+	left: 60%;
+	background: black; 
+	color: white; 
+	font-size: 28px; 
+	font-weight: bold; 
+	font-family: Arial; 
+	padding: 20px;
+
+}
+
+</style>
+<canvas id="canvas"> 
+
+
+
+</canvas> 
+
+
+<div id="timer"> 
+
+</div>
+
+
+<script>
+
+	var canvas = document.getElementsByTagName('canvas')[0]; 
+	var ctx = canvas.getContext('2d'); 
+
+	canvas.height = 300; 
+	canvas.width = 300; 
+
+
+
+ctx.fillStyle = "#dff381"; 
+ctx.fillRect(0,0,canvas.width, canvas.height);
+/// sphere
+	ctx.beginPath(); 
+	ctx.fillStyle = "red"; 
+	this.x = 150; 
+	this.y = 150; 
+	ctx.arc(this.x, this.y, 10, 0, 2*Math.PI);
+	ctx.fill();
+///sphere
+
+//board
+	ctx.fillStyle = "blue"; 
+	this.board_x = canvas.width/2-40; 
+	ctx.fillRect(canvas.width/2-40, canvas.height-10, 80, 10); 
+//board
+
+V=3; 
+//functions 
+function draw(x, d) {
+
+	if(window.board_x>=220&&x==1||window.board_x<=0&&x!=1) {//right or left edge
+		return false;  	
+	}
+
+ctx.fillStyle = "#dff381"; 
+ctx.fillRect(window.board_x, canvas.height-10, 80, 10);//clear
+(x==1)?	window.board_x+=d: window.board_x-=d; 
+ctx.fillStyle = "blue"; 
+ctx.fillRect(window.board_x, canvas.height-10, 80, 10); 
+}
+
+
+
+
+
+///////////////////binds
+/*
+window.onkeydown = function(e) {
+
+	if(e.keyCode==39) { 
+		draw(1); 
+	}
+	if(e.keyCode==37) {
+
+		draw(0); 
+	}
+
+}*/ 
+
+var cL = parseFloat(getComputedStyle(document.getElementById('canvas'))['left']); 
+var cW = parseFloat(getComputedStyle(document.getElementById('canvas'))['width']); 
+window.onmousemove = function(e) {
+	
+if(!(e.clientX>cL&&e.clientX<cL+cW))	return false; 
+
+if(!window.bX) window.bX=event.clientX; 
+
+if(window.bX>event.clientX){
+ d = window.bX - event.clientX; 
+	draw(0, d); 
+} 
+if(window.bX<event.clientX) 
+{
+ d = -window.bX + event.clientX; 	
+	draw(1, d); 
+} 
+window.bX = event.clientX; 
+
+
+} 
+
+
+
+//////////binds
+
+
+
+
+kX= 0.6 + Math.random()*0.2; 
+kY=1-kX;  
+
+
+function circleDraw() {
+
+
+
+	if(window.y<=10) {
+
+
+	kY=-kY; 	
+	}
+		if(window.x<=10||window.x>=290) { 	
+
+	kX=-kX; 	
+	}
+
+
+
+	ctx.beginPath(); 
+	ctx.save(); 
+	ctx.fillStyle = "#dff381"; 
+	ctx.arc(window.x, window.y, 10+1, 0, 2*Math.PI);
+	ctx.fill();
+	ctx.closePath();
+		if(window.y>=277) {
+		if((window.x+10>window.board_x&&window.x-10<=window.board_x+80)) {
+
+			kY=-kY; 
+		} else {
+			alert("Game Over!!!"); 
+		clearInterval(window.d); 
+		clearInterval(window.t); 
+		return false; 
+
+		}
+
+
+	}
+	window.x=window.x+kX*V; 
+	console.log(kY);
+	window.y=window.y-kY*V;  			
+
+
+
+
+
+
+	ctx.beginPath();
+	ctx.fillStyle = "red"; 
+	ctx.arc(window.x, window.y, 10, 0, 2*Math.PI);
+	ctx.fill();
+
+}
+
+
+
+
+
+window.d=setInterval(circleDraw, 20);
+
+var ms = 0; 
+var s = 0; 
+function timer() {
+	ms++; 
+	V+=0.001;
+	if(ms==1000) {
+		ms=0; 
+		s++;  
+	}
+	if(s.toString().length==1) {
+
+		s = '0'+s; 
+
+	}
+	switch(ms.toString().length) {
+		case 1: 
+		ms = "00"+ ms; 
+		break; 
+		case 2: 
+		ms = "0" + ms; 
+		break;		
+	}
+
+
+
+document.getElementById('timer').innerHTML = s + ":" + ms; 	
+
+}
+
+
+window.t = setInterval(timer, 1); 
+
+
+
+
+
+</script>
+
+
+<!--
+
+1 - 1000
+2-4000
+3-8000
+2000 -? 
+
+k1 + 4*k2 + 8*k3 = 2
+
+
+7,7 30,8 61,5
+154 616 1232
+
+
+
+
+7,7 
+
+
+
+
+-->
